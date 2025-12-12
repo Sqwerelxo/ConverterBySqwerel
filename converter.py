@@ -53,10 +53,6 @@ style.map('TCombobox',
           selectforeground=[('readonly', COLORS['bg'])])
 
 sources = {
-    "ЦБ РФ": {
-        "url": "https://www.cbr-xml-daily.ru/daily_json.js",
-        "base_currency": "RUB"
-    },
     "ExchangeRate-API": {
         "url": "https://api.exchangerate-api.com/v4/latest/USD",
         "base_currency": "USD"
@@ -71,14 +67,14 @@ sources = {
     }
 }
 
-current_source = "ЦБ РФ"
+current_source = "ExchangeRate-API"
 rates = {}
 currency_names = {}
 
 source_var = tk.StringVar(value=current_source)
 amount_var = tk.StringVar(value="100")
 from_var = tk.StringVar(value="USD")
-to_var = tk.StringVar(value="RUB")
+to_var = tk.StringVar(value="EUR")
 result_var = tk.StringVar(value="")
 status_var = tk.StringVar(value="Загрузка...")
 from_name_var = tk.StringVar(value="")
@@ -87,17 +83,17 @@ to_name_var = tk.StringVar(value="")
 
 def get_currency_name(code):
     currency_names_dict = {
-        "RUB": "Российский рубль",
         "USD": "Доллар США",
         "EUR": "Евро",
         "GBP": "Фунт стерлингов",
-        "JPY": "Японская иена",
+        "JPY": "Японская йена",
         "CNY": "Китайский юань",
         "CHF": "Швейцарский франк",
         "CAD": "Канадский доллар",
         "AUD": "Австралийский доллар",
         "BTC": "Биткойн",
         "ETH": "Эфириум",
+        "RUB": "Российский рубль",
         "KZT": "Казахстанский тенге",
         "BYN": "Белорусский рубль",
         "UAH": "Украинская гривна",
@@ -106,7 +102,39 @@ def get_currency_name(code):
         "BRL": "Бразильский реал",
         "KRW": "Южнокорейская вона",
         "SGD": "Сингапурский доллар",
-        "HKD": "Гонконгский доллар"
+        "HKD": "Гонконгский доллар",
+        "NZD": "Новозеландский доллар",
+        "MXN": "Мексиканский песо",
+        "SEK": "Шведская крона",
+        "NOK": "Норвежская крона",
+        "DKK": "Датская крона",
+        "PLN": "Польский злотый",
+        "THB": "Тайский бат",
+        "IDR": "Индонезийская рупия",
+        "MYR": "Малайзийский ринггит",
+        "PHP": "Филиппинское песо",
+        "ZAR": "Южноафриканский рэнд",
+        "AED": "Дирхам ОАЭ",
+        "SAR": "Саудовский риял",
+        "ILS": "Израильский шекель",
+        "CZK": "Чешская крона",
+        "HUF": "Венгерский форинт",
+        "RON": "Румынский лей",
+        "BGN": "Болгарский лев",
+        "HRK": "Хорватская куна",
+        "ISK": "Исландская крона",
+        "ARS": "Аргентинское песо",
+        "CLP": "Чилийское песо",
+        "COP": "Колумбийское песо",
+        "PEN": "Перуанский соль",
+        "VND": "Вьетнамский донг",
+        "EGP": "Египетский фунт",
+        "PKR": "Пакистанская рупия",
+        "BDT": "Бангладешская така",
+        "NGN": "Нигерийская найра",
+        "KES": "Кенийский шиллинг",
+        "XAU": "Золото (унция)",
+        "XAG": "Серебро (унция)"
     }
     return currency_names_dict.get(code, code)
 
@@ -137,23 +165,14 @@ def update_rates():
 
         global rates, currency_names
 
-        if current_source == "ЦБ РФ":
-            rates = data['Valute']
-            rates['RUB'] = {'Value': 1, 'Nominal': 1, 'Name': 'Российский рубль'}
-
-            for code, info in rates.items():
-                currency_names[code] = info.get('Name', code)
-
-            currencies = list(rates.keys())
-
-        elif current_source == "ExchangeRate-API":
+        if current_source == "ExchangeRate-API":
             rates = data['rates']
             rates['USD'] = 1.0
             currency_names['USD'] = 'Доллар США'
 
             for code in rates.keys():
                 if code not in currency_names:
-                    currency_names[code] = code
+                    currency_names[code] = get_currency_name(code)
 
             currencies = list(rates.keys())
 
@@ -164,7 +183,7 @@ def update_rates():
 
             for code in rates.keys():
                 if code not in currency_names:
-                    currency_names[code] = code
+                    currency_names[code] = get_currency_name(code)
 
             currencies = list(rates.keys())
 
@@ -194,7 +213,7 @@ def update_rates():
         if from_var.get() not in currencies:
             from_var.set(base_currency)
         if to_var.get() not in currencies:
-            to_var.set("RUB" if "RUB" in currencies else list(currencies)[0] if currencies else base_currency)
+            to_var.set("EUR" if "EUR" in currencies else list(currencies)[0] if currencies else base_currency)
 
         update_currency_names()
 
@@ -215,16 +234,9 @@ def update_rates():
 
 
 def get_rate(currency):
-    if current_source == "ЦБ РФ":
-        if currency == 'RUB':
-            return Decimal(1)
-        rate_info = rates.get(currency)
-        if rate_info:
-            return Decimal(rate_info['Value']) / Decimal(rate_info['Nominal'])
-    else:
-        rate = rates.get(currency)
-        if rate is not None:
-            return Decimal(str(rate))
+    rate = rates.get(currency)
+    if rate is not None:
+        return Decimal(str(rate))
     return None
 
 
@@ -253,15 +265,12 @@ def convert():
                 result_var.set("Нет данных по валюте")
                 return
 
-            if current_source == "ЦБ РФ":
-                result = amount * from_rate / to_rate
-            else:
-                result = amount * to_rate / from_rate
+            result = amount * to_rate / from_rate
 
-        result = result.quantize(Decimal('0.0001'), rounding=ROUND_HALF_UP)
+        result = result.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         amount_formatted = f"{amount:,.2f}".replace(',', ' ').replace('.', ',')
-        result_formatted = f"{result:,.4f}".replace(',', ' ').replace('.', ',')
+        result_formatted = f"{result:,.2f}".replace(',', ' ').replace('.', ',')
 
         result_var.set(f"{amount_formatted} {from_curr} = {result_formatted} {to_curr}")
         update_currency_names()
