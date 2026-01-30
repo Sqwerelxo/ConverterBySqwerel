@@ -408,7 +408,7 @@ class CurrencyConverterApp:
         self.to_name_var = tk.StringVar()
 
     def create_widgets(self):
-        ttk.Label(self.root, text="КОНВЕРТЕР ВАЛЮТ by Sqwerel", style='Title.TLabel').pack(pady=15)
+        ttk.Label(self.root, text="Конвертер валют by Sqwerel", style='Title.TLabel').pack(pady=15)
         
         source_frame = ttk.Frame(self.root)
         source_frame.pack(pady=10, padx=25, fill='x')
