@@ -233,7 +233,7 @@ class CurrencyConverterApp:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Конвертер валют by Sqwerel")
-        self.root.geometry("550x650")
+        self.root.geometry("550x700")  # Увеличил высоту для кнопки
         self.root.configure(bg=COLORS['bg'])
         self.root.resizable(False, False)
         
@@ -310,8 +310,16 @@ class CurrencyConverterApp:
         self.to_combo.pack(side='left')
         ttk.Label(to_frame, textvariable=self.to_name_var, style='CurrencyName.TLabel').pack(side='left', padx=5)
         
+        # Кнопка конвертации
+        self.convert_btn = tk.Button(self.root, text="🔄 КОНВЕРТИРОВАТЬ", 
+                                    bg=COLORS['green'], fg=COLORS['bg'],
+                                    font=('Arial', 12, 'bold'), 
+                                    bd=0, padx=30, pady=10, 
+                                    cursor="hand2")
+        self.convert_btn.pack(pady=10)
+        
         result_frame = ttk.Frame(self.root)
-        result_frame.pack(pady=15, padx=25, fill='x')
+        result_frame.pack(pady=5, padx=25, fill='x')
         ttk.Label(result_frame, textvariable=self.result_var, style='Result.TLabel').pack()
         
         history_frame = ttk.Frame(self.root)
@@ -342,7 +350,7 @@ class CurrencyConverterApp:
         status_frame.pack(side='bottom', fill='x', pady=10)
         ttk.Label(status_frame, textvariable=self.status_var, style='Status.TLabel').pack()
         
-        self.refresh_btn = tk.Button(self.root, text="🔄 Обновить", bg=COLORS['blue'], fg=COLORS['white'],
+        self.refresh_btn = tk.Button(self.root, text="🔄 Обновить курсы", bg=COLORS['blue'], fg=COLORS['white'],
                                    font=('Arial', 9), bd=0, padx=15, pady=5, cursor="hand2")
         self.refresh_btn.pack(pady=5)
 
@@ -350,12 +358,17 @@ class CurrencyConverterApp:
         self.source_combo.bind('<<ComboboxSelected>>', lambda e: update_rates())
         self.swap_btn.config(command=swap_currencies)
         self.refresh_btn.config(command=update_rates)
+        self.convert_btn.config(command=convert) 
         
-        self.amount_var.trace_add('write', lambda *args: convert())
-        self.from_var.trace_add('write', lambda *args: convert())
-        self.to_var.trace_add('write', lambda *args: convert())
-        self.from_combo.bind('<<ComboboxSelected>>', lambda e: convert())
-        self.to_combo.bind('<<ComboboxSelected>>', lambda e: convert())
+        self.amount_entry.bind('<Return>', lambda e: convert())
+        self.from_combo.bind('<Return>', lambda e: convert())
+        self.to_combo.bind('<Return>', lambda e: convert())
+        
+#        self.amount_var.trace_add('write', lambda *args: convert())
+#        self.from_var.trace_add('write', lambda *args: convert())
+#        self.to_var.trace_add('write', lambda *args: convert())
+#        self.from_combo.bind('<<ComboboxSelected>>', lambda e: convert())
+#        self.to_combo.bind('<<ComboboxSelected>>', lambda e: convert())
 
     def run(self):
         with open("currencies.json", "r", encoding='utf-8') as f:
